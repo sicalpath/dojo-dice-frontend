@@ -15,7 +15,12 @@ import { publicProvider } from "wagmi/providers/public";
 import { trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets";
 
 import { PageContext } from "@/constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+// import useLogin from "@web3mq/react-components/dist/components/LoginModal/hooks/useLogin";
+import { useWeb3MQLogin } from "@/hooks/useWeb3MQLogin";
+import { Client } from "@web3mq/client";
+
 
 const { chains, publicClient } = configureChains(
   [mainnet, goerli, localhost],
@@ -54,12 +59,14 @@ const wagmiConfig = createConfig({
 export function Providers({ children }: { children: React.ReactNode }) {
   const [room, setRoom] = useState(-1);
   const [logs, setLogs] = useState<string[]>([]);
+  const [client, setClient] = useState<Client>();
+
 
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider chains={chains} modalSize="compact">
         <PageContext.Provider
-          value={{ room, setRoom, logs, pushLog: (log) => setLogs([log, ...logs]) }}
+          value={{ room, setRoom, logs, pushLog: (log) => setLogs([log, ...logs]), web3mqClient: client, setWeb3mqClient: setClient }}
         >
           {children}
         </PageContext.Provider>

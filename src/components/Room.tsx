@@ -1,9 +1,12 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import RoomInfo from "./RoomInfo";
 import RoomRanking from "./RoomRanking";
 import { PageContext } from "@/constants";
 import LogPanel from "./LogPanel";
+import { useWeb3MQLogin } from "@/hooks/useWeb3MQLogin";
+import { Client } from "@web3mq/client";
+import { useAccount } from "wagmi";
 
 
 
@@ -13,12 +16,21 @@ export default function Room({
     [key: string]: any;
 }) {
 
-    const { room, setRoom } = useContext(PageContext);
-    const { logs, pushLog } = useContext(PageContext);
+    const { room, setRoom, logs, pushLog, web3mqClient } = useContext(PageContext);
+    const { address, isConnecting } = useAccount();
+    const { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, logout } = useWeb3MQLogin();
+
+    useEffect(() => {
+        init();
+    }, []);
+
 
     const handlePushLog = () => {
         pushLog(new Date().toUTCString())
+
+        console.log(web3mqClient)
     }
+
 
 
     return (
@@ -32,9 +44,13 @@ export default function Room({
 
             {/* ROOM BODY */}
             <div className="flex w-full gap-8">
-                <div className="w-3/4">
+                <div className="w-3/4 flex flex-col gap-5">
                     1
                     <button onClick={handlePushLog}>add</button>
+
+                    <button onClick={loginByRainbow}>log</button>
+                    <button onClick={() => registerByRainbow("fick")}>reg</button>
+                    <button onClick={() => getUserAccount('metamask', address)}>get</button>
                 </div>
                 <div className="w-1/4 h-[70vh] mr-7 ">
                     <LogPanel />

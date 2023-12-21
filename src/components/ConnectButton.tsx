@@ -2,17 +2,24 @@
 import React from "react";
 import { ConnectButton as CB } from "@rainbow-me/rainbowkit";
 
-export default function ConnectButton() {
+export default function ConnectButton({
+  className = "",
+  ...props
+}: {
+
+  className?: string;
+  [key: string]: any;
+}) {
   return (
     <CB.Custom>
-      {({ account, chain, openChainModal, openConnectModal, mounted }) => {
+      {({ account, chain, openChainModal, openConnectModal, openAccountModal, mounted }) => {
         // Note: If your app doesn't use authentication, you
         // can remove all 'authenticationStatus' checks
         const ready = mounted;
         const connected = ready && account && chain;
 
         return (
-          <div className=" mx-auto flex">
+          <div className={`mx-auto flex hover:scale-105 disabled:opacity-50 disabled:scale-100 text-center select-none cursor-pointer py-1 transition duration-300 ${className} `}>
             {(() => {
               if (!connected) {
                 return (
@@ -35,7 +42,7 @@ export default function ConnectButton() {
 
               return (
                 <div className="flex flex-col gap-2 mx-auto">
-                  <div className="flex " onClick={openChainModal}>
+                  <div className="flex " onClick={openAccountModal}>
                     {chain.hasIcon && (
                       <div
                         style={{
