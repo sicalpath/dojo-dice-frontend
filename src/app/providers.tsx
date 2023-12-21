@@ -53,12 +53,13 @@ const wagmiConfig = createConfig({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [room, setRoom] = useState(-1);
+  const [logs, setLogs] = useState<string[]>([]);
 
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider chains={chains} modalSize="compact">
         <PageContext.Provider
-          value={{ room, setRoom }}
+          value={{ room, setRoom, logs, pushLog: (log) => setLogs([log, ...logs]) }}
         >
           {children}
         </PageContext.Provider>

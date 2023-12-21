@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 import RoomInfo from "./RoomInfo";
 import RoomRanking from "./RoomRanking";
 import { PageContext } from "@/constants";
+import LogPanel from "./LogPanel";
 
 
 
@@ -13,10 +14,15 @@ export default function Room({
 }) {
 
     const { room, setRoom } = useContext(PageContext);
+    const { logs, pushLog } = useContext(PageContext);
+
+    const handlePushLog = () => {
+        pushLog(new Date().toUTCString())
+    }
 
 
     return (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full z-20">
 
             {/* ROOM HEADER */}
             <div className="flex w-full">
@@ -28,9 +34,10 @@ export default function Room({
             <div className="flex w-full gap-8">
                 <div className="w-3/4">
                     1
+                    <button onClick={handlePushLog}>add</button>
                 </div>
-                <div className="w-1/4">
-                    2
+                <div className="w-1/4 h-[70vh] mr-7 ">
+                    <LogPanel />
                 </div>
             </div>
         </div>
