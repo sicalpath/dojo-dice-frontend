@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Client, KeyPairsType, WalletType, BlockChainType } from '@web3mq/client';
+import { Client, KeyPairsType, WalletType, BlockChainType, DidType } from '@web3mq/client';
 import { useWalletClient, useAccount } from 'wagmi'
 
 const BlockChainMap: Record<WalletType, BlockChainType> = {
@@ -22,7 +22,7 @@ type UserAccountType = {
 };
 
 const PASSWORD = "111111";
-const APPKEY = 'vAUJTFXbBZRkEDRE';
+const APPKEY = 'vAUJTFXbBZRkEDRE';  //OVEEGLRxtqXcEIJN  //vAUJTFXbBZRkEDRE
 export function useWeb3MQLogin() {
     const hasKeys = useMemo(() => {
         const PrivateKey = localStorage.getItem('PRIVATE_KEY') || '';
@@ -35,24 +35,17 @@ export function useWeb3MQLogin() {
     }, []);
     const { data: walletClient, isError, isLoading } = useWalletClient();
     const { address } = useAccount();
+
     const [keys, setKeys] = useState<KeyPairsType | null>(hasKeys);
     const [fastestUrl, setFastUrl] = useState<string | null>(null);
     const [userAccount, setUserAccount] = useState<UserAccountType>({
-        userid: address as string,
+        userid: "",
         address: address as string,
         walletType: 'metamask',
         userExist: false,
     });
+
     const [mainKeys, setMainKeys] = useState<MainKeysType>();
-
-
-
-    // const userAccount: UserAccountType = {
-    //     userid: walletClient?.account.address as string,
-    //     address: walletClient?.account.address as string,
-    //     walletType: 'metamask',
-    //     userExist: false,
-    // };
 
 
 
@@ -68,7 +61,34 @@ export function useWeb3MQLogin() {
         });
         localStorage.setItem('FAST_URL', fastUrl);
         setFastUrl(fastUrl);
+        getUserAccount('metamask', address?.toLowerCase());
+        // const { userid, userExist } = await Client.register.getUserInfo({
+        //     did_value: address as string,
+        //     did_type: 'metamask' as DidType,
+        // });
+
     };
+
+    const createRoom = async (name = "FUCK HOUSE") => {
+        const client = Client.getInstance(keys);
+        await client?.channel.createRoom({
+            groupName: name,
+            avatarBase64: "",
+        })
+        await client?.channel.queryChannels({
+            page: 1,
+            size: 20,
+        });
+        if (client?.channel.channelList) {
+            console.log(client?.channel.channelList)
+            await client.channel.setActiveChannel(client.channel.channelList[0]);
+        }
+    }
+
+    const sendMsg = async (msg: string, to: string) => {
+        const client = Client.getInstance(keys);
+        client?.message.sendMessage(msg, to);
+    }
 
     const getUserAccount = async (
         didType: WalletType = 'metamask',
@@ -77,7 +97,7 @@ export function useWeb3MQLogin() {
         address: string;
         userExist: boolean;
     }> => {
-        let didValue = address;
+        let didValue = address?.toLowerCase();
         if (!didValue) {
             const { address } = await Client.register.getAccount(didType);
             didValue = address;
@@ -86,12 +106,14 @@ export function useWeb3MQLogin() {
             did_value: didValue,
             did_type: BlockChainMap[didType],
         });
+
         setUserAccount({
             userid,
             address: didValue as string,
             walletType: didType,
             userExist,
         });
+
         return {
             address: didValue as string,
             userExist,
@@ -294,8 +316,11 @@ export function useWeb3MQLogin() {
     const logout = () => {
         localStorage.setItem('PRIVATE_KEY', '');
         localStorage.setItem('PUBLIC_KEY', '');
+        localStorage.setItem('MAIN_PRIVATE_KEY', '');
+        localStorage.setItem('MAIN_PUBLIC_KEY', '');
         localStorage.setItem('DID_KEY', '');
         localStorage.setItem('userid', '');
+        localStorage.setItem('WALLET_ADDRESS', '');
         setKeys(null);
     };
 
@@ -335,10 +360,19 @@ export function useWeb3MQLogin() {
                 localStorage.setItem(`MAIN_PRIVATE_KEY`, privateKey);
                 localStorage.setItem(`MAIN_PUBLIC_KEY`, publicKey);
             }
+
+            if (eventData.type === 'get') {
+                const { main_pubkey, pubkey, did_value, userid, wallet_address } = eventData.data;
+                // Store to browser cache
+                localStorage.setItem('WALLET_ADDRESS', wallet_address);
+                localStorage.setItem(`MAIN_PRIVATE_KEY`, main_pubkey);
+                localStorage.setItem(`MAIN_PUBLIC_KEY`, pubkey);
+                localStorage.setItem('userid', userid);
+            }
         }
     };
 
 
 
-    return { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, logout };
+    return { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, createRoom, sendMsg, logout };
 };

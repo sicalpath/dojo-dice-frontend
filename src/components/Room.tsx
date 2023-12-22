@@ -20,14 +20,16 @@ export default function Room({
     const { address, isConnecting } = useAccount();
     const { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, logout } = useWeb3MQLogin();
 
+
+
     useEffect(() => {
-        init();
+        // init();
+        console.log(keys)
     }, []);
 
 
     const handlePushLog = () => {
         pushLog(new Date().toUTCString())
-
         console.log(web3mqClient)
     }
 
@@ -37,7 +39,7 @@ export default function Room({
         <div className="flex flex-col w-full z-20">
 
             {/* ROOM HEADER */}
-            <div className="flex w-full">
+            <div className="flex w-full mt-12">
                 <RoomInfo text={`Room ${room + 1}`} />
                 <RoomRanking />
             </div>

@@ -4,8 +4,9 @@ import Button from '@/components/Button';
 import ConnectButton from '@/components/ConnectButton'
 import { useWeb3MQLogin } from "@/hooks/useWeb3MQLogin";
 import { useAccount } from "wagmi";
-import { Client } from "@web3mq/client";
+import { Client, DidType } from "@web3mq/client";
 import { PageContext } from "@/constants";
+import useLogin from "@/hooks/useLogin";
 
 
 export default function Configs({
@@ -17,25 +18,43 @@ export default function Configs({
 }) {
     const { web3mqClient, setWeb3mqClient } = useContext(PageContext);
     const { address, isConnecting } = useAccount();
-    const { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, logout } = useWeb3MQLogin();
+    const { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, logout, createRoom, sendMsg } = useWeb3MQLogin();
+
 
     useEffect(() => {
         init();
+        // console.log(keys)
+        // const client = Client.getInstance(keys);
+        // console.log(client)
+
+        const client = Client.getInstance(keys);
+        client.on('channel.activeChange', console.log);
+        client.on('channel.created', console.log);
+        client.on('message.delivered', console.log);
+        client.on('channel.getList', console.log);
+        client.on('channel.updated', console.log);
     }, []);
 
-    const handleConnectWweb3MQ = async () => {
-        const { address: walletAddress, userExist } = await getUserAccount('metamask', address);
+    const handleConnectWeb3MQ = async () => {
+        const { address: walletAddress, userExist } = await getUserAccount('metamask', address?.toLowerCase());
         if (!userExist) {
-            registerByRainbow('shit');
+            await registerByRainbow('shit');
         } else {
-            loginByRainbow();
+            await loginByRainbow();
         }
-        //@ts-ignore
-        const client = Client.getInstance(keys);
-        console.log(client)
-        setWeb3mqClient(client);
+        // //@ts-ignore
+        // const client = Client.getInstance(keys);
+        // console.log(client)
+        // setWeb3mqClient(client);
     }
 
+    const handleCreateRoom = (name = "FUCK HOUSE") => {
+        createRoom(name)
+    }
+
+    const handleSendMsg = () => {
+        sendMsg(new Date().toUTCString(), 'group:c61abf3ef71ea1597b4e4e4761b01f5ead154017')
+    }
 
 
     return (
@@ -45,7 +64,10 @@ export default function Configs({
             {...props}
         >
             <ConnectButton className="bg-pink-400 rounded-md px-3 text-sm text-white mt-3 tracking-wider" />
-            <Button text={web3mqClient != undefined ? 'Connected' : 'WEB3MQ'} onClick={handleConnectWweb3MQ} className='bg-pink-400 rounded-md px-3 text-sm text-white mt-3 tracking-wider' disabled={web3mqClient != undefined} />
+            <Button text={web3mqClient != undefined ? 'Connected' : 'WEB3MQ'} onClick={handleConnectWeb3MQ} className='bg-pink-400 rounded-md px-3 text-sm text-white mt-3 tracking-wider' />
+            <Button text={'Create'} onClick={() => { handleCreateRoom("hah") }} className='bg-pink-400 rounded-md px-3 text-sm text-white mt-3 tracking-wider' />
+            <Button text={'Send'} onClick={handleSendMsg} className='bg-pink-400 rounded-md px-3 text-sm text-white mt-3 tracking-wider' />
+            <Button text={'Logout'} onClick={logout} className='bg-pink-400 rounded-md px-3 text-sm text-white mt-3 tracking-wider' />
         </div>
     );
 }
