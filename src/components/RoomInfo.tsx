@@ -17,8 +17,8 @@ export default function RoomInfo({
 
     return (
         <div className="flex ml-8 text-xl font-bold text-pink-600 z-20">
-            <div className=" text-xl font-bold " onClick={() => setRoom(-1)}>⬅️</div>
+            <div className=" text-xl font-bold " onClick={() => setRoom("")}>⬅️</div>
             <div className="">{text}</div>
-        </div>
+        </div >
     );
 }

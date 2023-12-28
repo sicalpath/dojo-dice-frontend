@@ -37,6 +37,7 @@ export function useWeb3MQLogin() {
     const { address } = useAccount();
 
     const [keys, setKeys] = useState<KeyPairsType | null>(hasKeys);
+    const [client, setClient] = useState<Client>();
     const [fastestUrl, setFastUrl] = useState<string | null>(null);
     const [userAccount, setUserAccount] = useState<UserAccountType>({
         userid: "",
@@ -49,11 +50,12 @@ export function useWeb3MQLogin() {
 
 
 
+
     const init = async () => {
         const tempPubkey = localStorage.getItem('PUBLIC_KEY') || '';
         const didKey = localStorage.getItem('DID_KEY') || '';
         const fastUrl = await Client.init({
-            connectUrl: localStorage.getItem('FAST_URL'),
+            connectUrl: localStorage.getItem('FAST_URL') || "https://testnet-ap-singapore-1.web3mq.com",
             app_key: APPKEY,
             env: 'dev',
             didKey,
@@ -62,16 +64,15 @@ export function useWeb3MQLogin() {
         localStorage.setItem('FAST_URL', fastUrl);
         setFastUrl(fastUrl);
         getUserAccount('metamask', address?.toLowerCase());
-        // const { userid, userExist } = await Client.register.getUserInfo({
-        //     did_value: address as string,
-        //     did_type: 'metamask' as DidType,
-        // });
-
+        if (keys) {
+            const client = Client.getInstance(keys);
+            setClient(client)
+        }
     };
 
-    const createRoom = async (name = "FUCK HOUSE") => {
-        const client = Client.getInstance(keys);
+    const createRoom = async (id: string, name = "FUCK HOUSE") => {
         await client?.channel.createRoom({
+            groupid: id,
             groupName: name,
             avatarBase64: "",
         })
@@ -80,13 +81,33 @@ export function useWeb3MQLogin() {
             size: 20,
         });
         if (client?.channel.channelList) {
-            console.log(client?.channel.channelList)
+            console.log(client.channel.channelList)
             await client.channel.setActiveChannel(client.channel.channelList[0]);
         }
     }
 
+    const getRooms = async (ids: string[]) => {
+        //@ts-ignore
+        const data = await client?.channel.queryGroups(ids, true);
+        console.log(data)
+        return data;
+    }
+
+    const joinRoom = async (id: string) => {
+        //@ts-ignore
+        const data = await client?.channel.joinGroup(id)
+        console.log(data)
+        return data;
+    }
+
+    const getRoomMembers = async (id: string) => {
+        //@ts-ignore
+        const data = await client?.channel.getGroupMemberList({ page: 1, size: 10 }, id)
+        console.log(data)
+        return data;
+    }
+
     const sendMsg = async (msg: string, to: string) => {
-        const client = Client.getInstance(keys);
         client?.message.sendMessage(msg, to);
     }
 
@@ -126,6 +147,8 @@ export function useWeb3MQLogin() {
         userid: string;
         didType: WalletType;
         didValue: string;
+        // onEventsHandler: (data: any) => void
+
     }) => {
         const { didType, didValue, userid } = options;
 
@@ -148,6 +171,7 @@ export function useWeb3MQLogin() {
                 address: didValue,
                 pubkeyExpiredTimestamp,
                 walletType: didType,
+                // onEventsHandler
             },
         });
     };
@@ -159,6 +183,7 @@ export function useWeb3MQLogin() {
         didType: WalletType;
         didValue: string;
         signature: string;
+        // onEventsHandler: (data: any) => void;
         didPubkey?: string;
         nickname?: string;
     }) => {
@@ -169,6 +194,7 @@ export function useWeb3MQLogin() {
             signature,
             didValue,
             didType,
+            // onEventsHandler,
             didPubkey = '',
             nickname = '',
         } = options;
@@ -200,6 +226,7 @@ export function useWeb3MQLogin() {
             didType,
             didValue,
             userid,
+            // onEventsHandler
         });
     };
 
@@ -224,6 +251,7 @@ export function useWeb3MQLogin() {
             didType: walletType,
             didValue: address,
             signature: signature as string,
+            // onEventsHandler,
             nickname,
         });
     };
@@ -252,6 +280,7 @@ export function useWeb3MQLogin() {
             userid,
             didType: walletType,
             didValue: address,
+            // onEventsHandler
         });
     };
 
@@ -321,6 +350,7 @@ export function useWeb3MQLogin() {
         localStorage.setItem('DID_KEY', '');
         localStorage.setItem('userid', '');
         localStorage.setItem('WALLET_ADDRESS', '');
+        localStorage.setItem('FAST_URL', '');
         setKeys(null);
     };
 
@@ -336,6 +366,7 @@ export function useWeb3MQLogin() {
                     userid,
                     address,
                     pubkeyExpiredTimestamp,
+                    // onEventsHandler
                 } = eventData.data;
                 // Store to browser cache
                 localStorage.setItem('userid', userid);
@@ -352,6 +383,18 @@ export function useWeb3MQLogin() {
                     PublicKey: tempPublicKey,
                     userid,
                 });
+                const client = Client.getInstance({
+                    PrivateKey: tempPrivateKey,
+                    PublicKey: tempPublicKey,
+                    userid,
+                });
+                setClient(client);
+                // client.on('channel.activeChange', onEventsHandler);
+                // client.on('channel.created', onEventsHandler);
+                // client.on('message.delivered', onEventsHandler);
+                // client.on('channel.getList', onEventsHandler);
+                // client.on('channel.updated', onEventsHandler);
+
             }
             if (eventData.type === 'register') {
                 const { privateKey, publicKey, address } = eventData.data;
@@ -374,5 +417,5 @@ export function useWeb3MQLogin() {
 
 
 
-    return { keys, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, createRoom, sendMsg, logout };
+    return { keys, client, fastestUrl, init, loginByRainbow, registerByRainbow, getUserAccount, createRoom, sendMsg, getRooms, joinRoom, getRoomMembers, logout };
 };

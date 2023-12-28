@@ -15,12 +15,10 @@ export default function RoomRanking({
 
 
     return (
-        <div className="flex flex-col ml-auto mr-8 text-xl font-semibold text-pink-600">
+        <div className="flex flex-col ml-auto mr-20 text-xl font-semibold text-pink-600">
             <p>Players</p>
-            <p>{emojiAvatarFromAddress(address || "").emoji}1</p>
-            <p>111</p>
-            <p>214</p>
-            <p>136</p>
+            <p>{emojiAvatarFromAddress(address || "").emoji}</p>
+
         </div>
     );
 }

@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 // import useLogin from "@web3mq/react-components/dist/components/LoginModal/hooks/useLogin";
 import { useWeb3MQLogin } from "@/hooks/useWeb3MQLogin";
 import { Client } from "@web3mq/client";
+import { Battle, Seeds } from "./types";
 
 
 const { chains, publicClient } = configureChains(
@@ -57,16 +58,26 @@ const wagmiConfig = createConfig({
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [room, setRoom] = useState(-1);
+  const [room, setRoom] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
   const [client, setClient] = useState<Client>();
+
+  const [battle, setBattle] = useState<Battle>({
+    gameId: "",
+    roomId: "",
+    opponent: "",
+    mySeeds: { value: ["", ""], hash: ["", ""] },
+    oppoSeeds: { value: ["", ""], hash: ["", ""] },
+    timestamp: 0
+  });
+
 
 
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider chains={chains} modalSize="compact">
         <PageContext.Provider
-          value={{ room, setRoom, logs, pushLog: (log) => setLogs([log, ...logs]), web3mqClient: client, setWeb3mqClient: setClient }}
+          value={{ room, setRoom, logs, setLogs: (log: any) => setLogs, web3mqClient: client, setWeb3mqClient: setClient, battle, setBattle }}
         >
           {children}
         </PageContext.Provider>
