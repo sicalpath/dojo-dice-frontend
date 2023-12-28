@@ -68,6 +68,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     opponent: "",
     mySeeds: { value: ["", ""], hash: ["", ""] },
     oppoSeeds: { value: ["", ""], hash: ["", ""] },
+    running: false,
     timestamp: 0
   });
 

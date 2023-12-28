@@ -60,7 +60,7 @@ export default function Lobby({
         <div className="flex flex-col items-center">
             <div className="grid grid-cols-4 gap-2 ">
                 {roomIds.map((id, index) => (//@ts-ignore
-                    <RoomEnter id={index + 1} active={active == index} onClick={() => { setActive(index); roomRef.current.value = roomIds[index]; }} metadata={metadatas && metadatas[index]} />
+                    <RoomEnter id={index + 1} key={id} active={active == index} onClick={() => { setActive(index); roomRef.current.value = roomIds[index]; }} metadata={metadatas && metadatas[index]} />
                 ))}
             </div>
             <div className='mt-5'>
