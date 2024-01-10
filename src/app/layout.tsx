@@ -11,11 +11,11 @@ import React, { Suspense } from "react";
 // const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "FUCK YOU ALL",
-  description: "FUCK FUCK FUCK",
+  title: "Dojo Dice",
+  description: "Dojo is good, web3mq is good",
   openGraph: {
-    title: "DO FUCK",
-    description: "SHIT SHIT",
+    title: "dojo, web3mq",
+    description: "cool cool cool",
   },
 }
 

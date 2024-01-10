@@ -39,7 +39,7 @@ export default function Home() {
 
       {room == "" ? (<div className='flex flex-col items-center z-20'>
         <div className='text-5xl text-pink-800 mt-20'>
-          Fuck You Dice!
+          Dojo Dice!
         </div>
         <Configs />
         <div className='flex flex-col items-center mt-36'>
